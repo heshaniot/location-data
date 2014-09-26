@@ -1,0 +1,77 @@
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<project default="compile">
+
+    <property name="cep.home" value="../../.."/>
+    <property name="src.dir" value="src/main/java"/>
+    <property name="resources.dir" value="resources"/>
+    <property name="temp.dir" value="temp"/>
+    <property name="lib.dir" value="../../lib"/>
+    <property name="class.dir" value="${temp.dir}/classes"/>
+
+    <property name="url" value="http://localhost:9763/endpoints/httpInputAdaptor/locationInStream"/>
+
+    <path id="javac.classpath">
+        <pathelement path="${class.dir}"/>
+        <fileset dir="${cep.home}/repository/components/plugins/">            
+            <include name="org.wso2.carbon.logging_4.2.0.jar"/>
+            <include name="commons-pool_1.5.6.wso2v1.jar"/>
+            <include name="httpclient_4.2.5.wso2v1.jar"/>
+            <include name="httpcore_4.3.0.wso2v1.jar"/>
+            <include name="commons-httpclient_3.1.0.wso2v2.jar"/>
+            <include name="commons-codec_1.4.0.wso2v1.jar"/>
+            <include name="com.google.gson_2.1.0.jar"/>
+        </fileset>
+    </path>
+
+
+    <target name="clean">
+        <!--<delete dir="target" quiet="true"/>-->
+        <delete dir="${class.dir}" quiet="true"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${temp.dir}"/>
+        <mkdir dir="${class.dir}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${class.dir}">
+            <include name="*/**"/>
+            <classpath refid="javac.classpath"/>
+        </javac>
+        <copy todir="${class.dir}" overwrite="true">
+            <fileset dir="${resources.dir}">
+                <include name="*.*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="locationDataPublisher" depends="compile">
+        <echo>To configure url use -Durl=xxxx </echo>
+        <echo>Sending to : ${url}</echo>
+        <java classname="org.wso2.cep.LocationDataProducer"
+              classpathref="javac.classpath" fork="true">
+            <arg value="${url}"/>
+        </java>
+    </target>
+
+</project>
